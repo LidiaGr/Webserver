@@ -1,4 +1,4 @@
-//
+
 //  WebServer.cpp
 //  webserv
 //
@@ -8,8 +8,10 @@
 
 #include "../includes/WebServer.hpp"
 
-WebServer::WebServer() : _servers(std::vector<Server *>()), _clients(std::vector<Client *>()) {};
-WebServer::~WebServer() {};
+WebServer::WebServer() : _servers(std::vector<Server *>()), _clients(std::vector<Client *>()) {
+	_statCodes = new StatusCodeHTTP();
+};
+WebServer::~WebServer() { delete _statCodes; };
 
 std::vector<Server *> WebServer::getServer() const {
 	return this->_servers;
@@ -31,7 +33,6 @@ void WebServer::setServer(Server * server) {
 		}
 	}
 	this->_servers.push_back(server);
-	printEvent("add new server");
 };
 
 void WebServer::openListenSock() {
@@ -77,7 +78,7 @@ void WebServer::startServer() {
 		int maxFd = _servers.back()->getListenFd();
 		
 		struct timeval timeout;
-		timeout.tv_sec = 5;
+		timeout.tv_sec = 0;
 		timeout.tv_usec = 300000;
 		
 		//add in readFD CLIENTS sockets
@@ -108,50 +109,45 @@ void WebServer::startServer() {
 					int flags = fcntl(newSocket, F_GETFL);
 					fcntl(newSocket, F_SETFL, flags | O_NONBLOCK);
 					
-					printEvent("add new client");
+//					printEvent("add new client");
 					_clients.push_back(new Client(newSocket, _servers.at(i)->getPort(), _servers.at(i)->getIp(), _servers.at(i)->getLocation()));
 				}
 			}
 		}
-			
-			//check all clients sockets and read requests
-			for (std::vector<Client *>::iterator it = _clients.begin(); it != _clients.end(); it++) {
-				if (FD_ISSET((*it)->getSocket(), &readFds)) {
-					
-					
-					char buffer[8000] = {0};
-					long valread;
-					valread = read((*it)->getSocket(), buffer, 8000);
-
-					(*it)->setBuff(buffer);
-					
-//					if (!(*it)->getBuff().compare(0, 2, "\r\n"))
-//						(*it)->setStatus(responsing);
-					if ((*it)->getBuff().size() != 0) {
-						std::cout << (*it)->getBuff() << std::endl;
-						(*it)->setResponse(handleRequestAndCreateResponse((*it)->getBuff(), (*it)->getLocation()).c_str());
-//						(*it)->setStatus(waiting);
-						(*it)->setStatus(responsing);
-					}
-					(*it)->setBuff(NULL);
-//					else {
-//						printEvent("Close client");
-//						close((*it)->getSocket());
-//					}
-					//MARK: Close connection because of an error or EOF
-//					if (valread < 0)
-//						close((*it)->getSocket());
-				}
-				if (FD_ISSET((*it)->getSocket(), &writeFds)) {
-					if ((*it)->getStatus() == responsing) {
-						send((*it)->getSocket(), (*it)->getResponse(), ft_strlen((*it)->getResponse()) , 0);
-						(*it)->setResponse(NULL);
-					}
-					(*it)->setStatus(closing);
-//					close((*it)->getSocket());
-//					_clients.erase(it);
+		
+		//check all clients sockets and read requests
+		for (std::vector<Client *>::iterator it = _clients.begin(); it != _clients.end(); it++) {
+			if (FD_ISSET((*it)->getSocket(), &readFds)) {
+				
+				
+				char buffer[8000] = {0};
+				long valread;
+				valread = read((*it)->getSocket(), buffer, 8000);
+				
+				(*it)->setBuff(buffer);
+				
+				if ((*it)->getBuff().find("\r\n\r\n") != -1) {
+					std::cout << (*it)->getBuff() << std::endl;
+					(*it)->setResponse(handleRequestAndCreateResponse((*it)->getBuff(), (*it)->getLocation()));
+					(*it)->setStatus(responsing);
 				}
 			}
+			if (FD_ISSET((*it)->getSocket(), &writeFds)) {
+				if ((*it)->getStatus() == responsing) {
+					send((*it)->getSocket(), (*it)->getResponse(), ft_strlen((*it)->getResponse()) , 0);
+					(*it)->setResponse(NULL);
+					(*it)->setStatus(closing);
+					(*it)->setBuff(NULL);
+					
+					//close socket when client recieve response and delete current client
+					FD_CLR((*it)->getSocket(), &readFds);
+					close((*it)->getSocket());
+					it = _clients.erase(it);
+					if (it == _clients.end())
+						break;
+				}
+			}
+		}
 	}
 }
 
@@ -176,63 +172,95 @@ std::string getCurrentDate() {  		//FIXME: check if forbidden
 	std::string res;
 	gettimeofday(&time, DST_NONE);
 	t = time.tv_sec;
-
+	
 	info = localtime(&t);
 	return res += asctime(info);
 }
 
-std::string WebServer::handleRequestAndCreateResponse(std::string str, std::string location) {
+char* allocateResponse(std::string response) {
+	char* res = NULL;
+	if ((res = (char*)malloc(sizeof(char) * (response.size() + 1))) == NULL) {
+		strerror(errno);
+		exit(1);
+	}
+	int i = 0;
+	for (std::string::iterator it = response.begin(); it != response.end(); it++) {
+		res[i] = *it;
+		i++;
+	}
+	res[i] = '\0';
+	return res;
+}
+
+
+std::string WebServer::requestSelector(std::vector<std::string> request, std::string location) {
+	std::vector<std::string>::iterator it = request.begin();
+	std::string res;
+	if (!it->compare(0, 5, "HEAD ")) {
+		res = handleGetAndHeadRequest(request, location);
+		return ((res + "\r\n"));
+	} else if (!it->compare(0, 4, "GET ")) {
+		res = handleGetAndHeadRequest(request, location);
+		res += getHtmlBody(location.c_str());
+		return ((res + "\r\n"));
+	} else {
+		res = _statCodes->getCodeAndStatus(400);
+		return ((res + "\r\n"));
+	}
+	return ("");
+}
+
+//FIXME: --- Походу надо все эти поля проинициализировать где-то при создании сервера!
+//Возможно хранить всю эту муть по частям в готовых строках(е) и добавлять только то что изменяется
+//Типа текущей даты и тд.
+//Так как порядок хедеров не важен можно в конце добавлять все изменяемое
+
+std::string WebServer::handleGetAndHeadRequest(std::vector<std::string> request, std::string location) {
+	std::string res;
+	res += "HTTP/1.1 " + _statCodes->getCodeAndStatus(200);
+	res += "Server: webserv/1.0\r\n";
+	res += "Date: " + getCurrentDate();
+	res += "Host: localhost\r\n";
+	res += "Accept-Charsets: utf-8\r\n";
+	res += "Accept-Language: en-US\r\n\r\n";
+	return (res);
+}
+
+char* WebServer::handleRequestAndCreateResponse(std::string str, std::string location) {
 	StatusCodeHTTP code = StatusCodeHTTP();
 	std::string res;
 	size_t start = 0;
 	size_t finish = 0;
 	std::vector<std::string> request;
 	if (str.size() > 8000)
-		return code.getCodeAndStatus(414) + "\r\n";
+		return (allocateResponse(code.getCodeAndStatus(414) + "\r\n"));
 	while (str.size() >= (finish + 1)) {
 		finish = str.find('\n');
 		request.push_back(str.substr(start, finish + 1));
 		str = str.substr(str.find('\n') + 1, str.size());
+		finish = 0;
 	}
 	//MARK: added str.clear()
-	for (std::vector<std::string>::iterator it = request.begin(); it != request.end(); it++) {
-		if (!it->compare(0, 16, "GET / HTTP/1.1\r\n") && (request.back().find_last_of("\r\n\r\n") != request.back().npos)) {
-			res += "HTTP/1.1 " + code.getCodeAndStatus(200);
-			res += "Server: webserv/1.0\r\n";
-			res += "Date: " + getCurrentDate();
-			res += "Host: localhost\r\n";
-			res += "Accept-Charsets: utf-8\r\n";
-			res += "Accept-Language: en-US\r\n\r\n";
-			res += getHtmlBody(location.c_str());
-			str.clear();
-			return (res + "\r\n");
-		}
+	
+	if (request.back() == "\r\n") {
+		res = requestSelector(request, location);
+		str.clear();
+		return (allocateResponse(res + "\r\n"));
 	}
-	str.clear();
-	return code.getCodeAndStatus(501) + "\r\n";
-};
-
-
-
-
-
-//		int new_socket;
-//		long valread;
-//		char hello[] = "HTTP/1.1 200 OK\r\n\r\n\r\n";
-//		while(1) {
-//			printf("\n+++++++ Waiting for new connection ++++++++\n\n");
-//			if ((new_socket = accept(server_fd, (struct sockaddr *)&addr, (socklen_t*)&addr)) < 0) {
-//				strerror(errno);
-//				exit(EXIT_FAILURE);
-//			}
-//
-//			char buffer[30000] = {0};
-//			valread = read(new_socket, buffer, 30000);
-//			printf("%s\n", buffer);
-////			write(new_socket, hello, strlen(hello));
-//			send(new_socket, &hello, strlen(hello), 0);
-//			printf("------------------Hello message sent-------------------\n");
-//			close(new_socket);
+	
+//	for (std::vector<std::string>::iterator it = request.begin(); it != request.end(); it++) {
+//		if (!it->compare(0, 16, "GET / HTTP/1.1\r\n") && (request.back() == "\r\n")) {
+//			res += "HTTP/1.1 " + code.getCodeAndStatus(200);
+//			res += "Server: webserv/1.0\r\n";
+//			res += "Date: " + getCurrentDate();
+//			res += "Host: localhost\r\n";
+//			res += "Accept-Charsets: utf-8\r\n";
+//			res += "Accept-Language: en-US\r\n\r\n";
+//			res += getHtmlBody(location.c_str());
+//			str.clear();
+//			return (allocateResponse(res + "\r\n"));
 //		}
 //	}
-////	close(server_fd);
+	str.clear();
+	return (allocateResponse(code.getCodeAndStatus(501) + "\r\n"));
+};

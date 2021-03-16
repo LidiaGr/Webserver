@@ -15,6 +15,8 @@ void configFileErrorHendler(size_t *stringNumber, std::string str) {
 //MARK: - dublicate variable?
 Server *addNewServer(std::vector<std::string> conf, size_t *stringNumber) {
 	Server *server = new Server();
+	//MARK: create default port 8080!
+	server->setPort("8080");
 	bool isConfig = false;
 	for (std::vector<std::string>:: iterator it = conf.begin(); it != conf.end(); it++) {
 		if (!it->compare(0, 1, "#"))

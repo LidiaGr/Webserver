@@ -6,8 +6,8 @@
 //  Copyright © 2021 Temple Tarsha. All rights reserved.
 //
 
-#ifndef StatusCodeHTTP_hpp
-#define StatusCodeHTTP_hpp
+#ifndef StatusCodeHTTP_HPP
+#define StatusCodeHTTP_HPP
 #include "main.hpp"
 
 class StatusCodeHTTP {

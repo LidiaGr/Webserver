@@ -16,6 +16,7 @@ int main() {
 //		webserv->getServer().at(i)->printData();
 	
 	webserv->openListenSock();
+	printEvent("START SERVER");
 	webserv->startServer();
 	
 	return 0;

@@ -13,11 +13,11 @@
 
 class WebServer;
 
-void	*ft_memset(void *s, int c, size_t n);
+void*	ft_memset(void *s, int c, size_t n);
 int		gnl(int fd, char **line);
 int 	confParser(WebServer* webserv);
 size_t  ft_strlen(const char *s);
-char	*ft_strjoin(char const *s1, char const *s2);
+char*	ft_strjoin(char const *s1, char const *s2);
 void	printEvent(std::string event);
 
 #endif /* utils_hpp */

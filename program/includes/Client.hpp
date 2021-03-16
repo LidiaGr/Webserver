@@ -19,7 +19,7 @@ private:
 	unsigned int short	_port;
 	std::string			_ip;
 	Status				_status;
-	const char*			_response;
+	char*				_response;
 	std::string			_buff;
 	std::string			_location;
 	
@@ -33,12 +33,12 @@ public:
 	unsigned int short		getPort() const;
 	std::string				getIp() const;
 	Status					getStatus() const;
-	const char*				getResponse() const;
+	char*					getResponse() const;
 	std::string				getBuff() const;
 	std::string 			getLocation() const;
 	
 	void					setStatus(Status status);
-	void					setResponse(const char* str);
+	void					setResponse(char* str);
 	void					setBuff(char* buff);
 };
 

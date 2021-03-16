@@ -22,11 +22,11 @@ public:
 	Server();
 	~Server();
 
-	void setName(std::string str);
-	void setPort(std::string str);
-	void setIp(std::string str);
-	void setLocation(std::string str);
-	void setListenFd(int fd);
+	void 				setName(std::string str);
+	void 				setPort(std::string str);
+	void 				setIp(std::string str);
+	void 				setLocation(std::string str);
+	void 				setListenFd(int fd);
 
 	std::string 		getName() const;
 	unsigned short int 	getPort() const;

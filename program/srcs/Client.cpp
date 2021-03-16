@@ -16,12 +16,19 @@ int					Client::getSocket() const { return this->_socket; };
 unsigned int short	Client::getPort() const { return this->_port; };
 std::string			Client::getIp() const { return this->_ip; };
 Status				Client::getStatus() const { return this->_status; };
-const char*			Client::getResponse() const { return this->_response; };
+char*				Client::getResponse() const { return this->_response; };
 std::string			Client::getBuff() const { return this->_buff; };
 std::string			Client::getLocation() const { return this->_location; };
 
 void	Client::setStatus(Status status) { _status = status; }
-void	Client::setResponse(const char* str) { _response = str; }
+void	Client::setResponse(char* str) {
+	if (str)
+		_response = str;
+	else {
+		free(_response);
+		_response = NULL;
+	}
+}
 void	Client::setBuff(char* buff) {
 	if (!buff)
 		_buff.clear();

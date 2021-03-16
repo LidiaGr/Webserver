@@ -8,7 +8,7 @@
 
 #include "../includes/utils.hpp"
 
-void	*ft_memset(void *s, int c, size_t n)
+void*	ft_memset(void *s, int c, size_t n)
 {
 	size_t			i;
 	unsigned char	*str;
@@ -23,7 +23,7 @@ void	*ft_memset(void *s, int c, size_t n)
 	return (s);
 }
 
-size_t     ft_strlen(const char *s)
+size_t	ft_strlen(const char *s)
 {
     int len = 0;
     
@@ -32,7 +32,7 @@ size_t     ft_strlen(const char *s)
     return (len);
 }
 
-char	*ft_strjoin(char const *s1, char const *s2)
+char*	ft_strjoin(char const *s1, char const *s2)
 {
 	char	*newstr;
 	size_t	len;
@@ -53,7 +53,7 @@ char	*ft_strjoin(char const *s1, char const *s2)
 	return (newstr);
 }
 
-char    *ft_strdup(char *s)
+char*	ft_strdup(char *s)
 {
    char *cpy;
    int i = 0;
@@ -69,7 +69,7 @@ char    *ft_strdup(char *s)
    return (cpy);
 }
 
-char    *ft_addsym(char *s, char *c)
+char*	ft_addsym(char *s, char *c)
 {
     char    *newS;
     int     i = 0;
@@ -83,7 +83,7 @@ char    *ft_addsym(char *s, char *c)
     return (newS);
 }
 
-char* deleteSpaces(char *str)
+char*	deleteSpaces(char *str)
 {
 	int i = 0;
 	int j;
@@ -110,7 +110,7 @@ char* deleteSpaces(char *str)
 	return (res);
 }
 
-int    ft_getline(char **str, char **line, ssize_t bytes)
+int		ft_getline(char **str, char **line, ssize_t bytes)
 {
     if (bytes == 0)
     {
