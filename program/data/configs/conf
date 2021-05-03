@@ -1,0 +1,70 @@
+server {
+	server_name: localhost
+	port: 8083
+	ip: 127.0.0.1
+	error_page: /notFound.html
+	
+	location: / {
+		root: /program/data
+		index: index.html
+		allow_methods: GET HEAD POST PUT
+	}
+	
+	location: /private_data {
+		root: /program/data/private_data
+		index: private.html
+		allow_methods: GET HEAD POST PUT
+	}
+}
+
+server {
+	server_name: localhost
+	port: 8082
+	ip: 127.0.0.1
+	error_page: /notFound.html
+
+	location: / {
+		autoindex: on
+		root: /program/data
+		index: index.html
+		allow_methods: GET HEAD POST PUT
+		cgi_pass: /cgi_scripts/test_cgi.php
+		cgi_extension: .php
+	}
+}
+
+server {
+	server_name: localhost
+	port: 8081
+	ip: 127.0.0.1
+	error_page: /notFound.html
+
+	location: / {
+		root: /program/data
+		index: index.html
+		allow_methods: GET
+	}
+	
+	location: /directory {
+		root: /tests/YoupiBanane
+		index: youpi.bad_extension
+		allow_methods: GET POST
+		
+		cgi_pass: /cgi_scripts/cgi_tester
+		cgi_extension: .bla
+	}
+	
+	location: /post_body {
+		root: /tests/YoupiBanane
+		allow_methods: POST
+		index: post.html
+		limit_client_body_size: 100
+		cgi_pass: /cgi_scripts/cgi_tester
+		cgi_extension: .bla
+	}
+	
+	location: /put_test {
+		root: /tests
+		allow_methods: PUT
+	}
+}

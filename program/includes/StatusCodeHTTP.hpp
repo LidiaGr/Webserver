@@ -15,7 +15,6 @@ private:
 	std::map<int, std::string> _codes;
 	
 	void setCodes();
-	std::string intToString(int num) const;
 	
 public:
 	StatusCodeHTTP();

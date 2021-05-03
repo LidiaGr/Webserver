@@ -11,11 +11,11 @@
 StatusCodeHTTP::StatusCodeHTTP() {
 	_codes = std::map<int, std::string>();
 	setCodes();
-};
+}
 
 StatusCodeHTTP::~StatusCodeHTTP() {
 	_codes.clear();
-};
+}
 
 void StatusCodeHTTP::setCodes() {
 	_codes[100] = "Continue";
@@ -95,26 +95,7 @@ void StatusCodeHTTP::setCodes() {
 	_codes[524] = "A Timeout Occurred";
 	_codes[525] = "SSL Handshake Failed";
 	_codes[526] = "Invalid SSL Certificate";
-};
-
-std::string StatusCodeHTTP::intToString(int num) const{
-	std::string result;
-	bool isNegative;
-	if (num < 0) {
-		isNegative = true;
-		num = -num;
-	}
-	else
-		isNegative = false;
-	while (num / 10 > 0) {
-		result.insert(result.begin(), ('0' + num % 10));
-		num /= 10;
-	}
-	result.insert(result.begin(), ('0' + num % 10));
-	if (isNegative)
-		result.insert(result.begin(), '-');
-	return result;
-};
+}
 
 std::pair<int, std::string> StatusCodeHTTP::getPair(int code) const {
 	std::pair<int, std::string> result;
@@ -126,11 +107,11 @@ std::pair<int, std::string> StatusCodeHTTP::getPair(int code) const {
 	} else
 		result = *it;
 	return result;
-};
+}
 
 std::string StatusCodeHTTP::getStatus(int code) const {
 	return getPair(code).second;
-};
+}
 
 std::string StatusCodeHTTP::getCodeAndStatus(int code) const {
 	std::string result;
@@ -139,4 +120,4 @@ std::string StatusCodeHTTP::getCodeAndStatus(int code) const {
 	result += " ";
 	result += pair.second;
 	return result + "\r\n";
-};
+}

@@ -10,29 +10,37 @@
 #define Server_hpp
 #include "main.hpp"
 
+class Location;
+
 class Server {
 private:
-	std::string			_name;
-	unsigned short int	_serv_port;
-	std::string			_serv_ip;
-	std::string			_location;
-	int					_listenFd;
+	std::string					_name;
+	unsigned short int			_serv_port;
+	std::string					_serv_ip;
+	std::string					_root;
+	std::string					_errorPage;
+	std::vector<Location*>		_location;
+	int							_listenFd;
 
 public:
 	Server();
 	~Server();
 
-	void 				setName(std::string str);
-	void 				setPort(std::string str);
-	void 				setIp(std::string str);
-	void 				setLocation(std::string str);
-	void 				setListenFd(int fd);
+	void	setName(std::string str);
+	void 	setPort(std::string str);
+	void	setRoot(std::string str, std::string path);
+	void 	setErrorPage(std::string str, std::string path);
+	void 	setIp(std::string str);
+	void 	setLocation(Location* src);
+	void 	setListenFd(int fd);
 
-	std::string 		getName() const;
-	unsigned short int 	getPort() const;
-	std::string 		getIp() const;
-	std::string 		getLocation() const;
-	int 				getListenFd() const;
+	std::string 					getName() const;
+	unsigned short int 				getPort() const;
+	std::string 					getIp() const;
+	std::string 					getRoot() const;
+	std::string 					getErrorPage() const;
+	std::vector<Location*>	 		getLocation() const;
+	int				 				getListenFd() const;
 	
 	void printData() const;
 };

@@ -15,18 +15,32 @@ NAME		= webserv
 OBJS_DIR	= bin/
 SRCS_DIR    = program/srcs/
 SRCS		= main \
-			  utils \
-			  configParser \
-			  WebServer \
-			  Server
+				requestHandler \
+				monitoringReadingProcess \
+				cgiHandler \
+				Client \
+				WebServer \
+				configParser \
+				StatusCodeHTTP \
+				dataAndTimeCreator \
+				Server \
+				reqestAndResponseUtils \
+				monitoringWritingProcess \
+				base64 \
+				autoIndexPageCreator \
+				Location \
+				clientsAuth \
+				utils
 
 OBJS		= $(addprefix $(OBJS_DIR), $(SRCS:=.o))
-INCLUDES	= includes/
+INCLUDES	= program/includes/
 
 CC			= clang++
-GCC_FLAGS	= -I $(INCLUDES) -g #-Wall -Wextra -Werror
+GCC_FLAGS	= -I $(INCLUDES) -g -Wall -Wextra -Werror -std=c++98 -pedantic
 
 
+#deb:
+#				echo $(OBJS)
 
 all:			$(OBJS_DIR) $(NAME)
 
@@ -34,7 +48,7 @@ $(OBJS_DIR):
 	mkdir -p	$(OBJS_DIR)
 
 $(NAME):		$(OBJS)
-	$(CC) 		-g $(OBJS) -o $(NAME)
+	$(CC) 		$(OBJS) -o $(NAME)
 
 $(OBJS):		$(OBJS_DIR)%.o: $(SRCS_DIR)%.cpp
 	$(CC)		$(GCC_FLAGS) -c $< -o $@

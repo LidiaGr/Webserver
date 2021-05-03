@@ -11,6 +11,7 @@
 
 #include "main.hpp"
 
+class Server;
 class Client;
 class StatusCodeHTTP;
 
@@ -18,7 +19,6 @@ class WebServer {
 protected:
 	std::vector<Server *>	_servers;
 	std::vector<Client *>	_clients;
-	StatusCodeHTTP 			*_statCodes;
 
 public:
 	WebServer();
@@ -29,11 +29,6 @@ public:
 	
 	void openListenSock();
 	void startServer();
-	char* handleRequestAndCreateResponse(std::string str, std::string location);
-	
-private:
-	std::string requestSelector(std::vector<std::string> request, std::string location);
-	std::string handleGetAndHeadRequest(std::vector<std::string> request, std::string location);
 };
 
 #endif /* WebServer_hpp */

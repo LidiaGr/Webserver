@@ -6,18 +6,19 @@
 //  Copyright © 2021 Temple Tarsha. All rights reserved.
 //
 
-#include "../includes/main.hpp"
+#include "main.hpp"
 
-int main() {
+int Client::_trashFileID = 0;
+
+int main(int argc, char* argv[]) {
+	char* fileName = NULL;
+	if (argc > 1)
+		fileName = argv[1];
 	WebServer* webserv = new WebServer();
-	confParser(webserv);
-	
-//	for (int i = 0; i < webserv->getServer().size(); i++)
-//		webserv->getServer().at(i)->printData();
-	
+	confParser(webserv, fileName);
 	webserv->openListenSock();
-	printEvent("START SERVER");
+	printEvent("START SERVER", G_COL);
 	webserv->startServer();
-	
+	delete webserv;
 	return 0;
 }
