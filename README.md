@@ -1,7 +1,8 @@
 # WEBSERVER
-Own HTTP server. Currently in Progress
+Own HTTP server.
 
-The aim of the project is to write own HTTP server, following the real HTTP RFC and availiable to test with a real browser.
+The aim of the project is to write own HTTP server, following the HTTP RFC and availiable to test with browser.
+
 
 # Skills
 - Network & system administration 
